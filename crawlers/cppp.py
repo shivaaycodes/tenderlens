@@ -55,6 +55,11 @@ def parse_cppp_global_html(
         if title and title in reference:
             reference = reference.replace(title, "", 1).strip(" /")
         reference = reference.replace(source_key, "").strip(" /")
+        href = anchor.get("href") if anchor else ""
+        if href and "tendersfullview" not in href:
+            detail_url = absolute(page_url, href)
+        else:
+            detail_url = "https://eprocure.gov.in/cppp/latestactivetendersnew"
         records.append(
             RawTender(
                 source="cppp",
@@ -68,7 +73,7 @@ def parse_cppp_global_html(
                 published_at=parse_portal_datetime(cell_text(cells[1])),
                 deadline_at=parse_portal_datetime(cell_text(cells[2])),
                 opening_at=parse_portal_datetime(cell_text(cells[3])),
-                detail_url=absolute(page_url, anchor.get("href") if anchor else ""),
+                detail_url=detail_url,
                 status="active",
                 raw={"corrigendum": cell_text(cells[6]) if len(cells) > 6 else ""},
             )

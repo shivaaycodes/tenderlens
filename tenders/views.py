@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.core.paginator import Paginator
 from django.db import connection
+from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -43,7 +44,7 @@ def tender_list(request):
     qs = (
         tenders_matching(filters)
         if filters
-        else Tender.objects.select_related("buyer").order_by("deadline_at")
+        else Tender.objects.select_related("buyer").order_by(F("deadline_at").asc(nulls_last=True))
     )
     page = Paginator(qs, PAGE_SIZE).get_page(request.GET.get("page"))
     return render(

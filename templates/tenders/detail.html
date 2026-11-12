@@ -17,7 +17,7 @@
   <dt>Estimated value</dt><dd>{{ tender.estimated_value_inr|inr }}</dd>
   <dt>EMD</dt><dd>{{ tender.emd_inr|inr }}</dd>
   <dt>Status</dt><dd>{{ tender.get_status_display }}</dd>
-  <dt>Official page</dt><dd>{% if tender.detail_url %}<a href="{{ tender.detail_url }}">Open on the source portal</a>{% else %}—{% endif %}</dd>
+  <dt>Official portal</dt><dd>{% if tender.detail_url %}<a href="{{ tender.detail_url }}" target="_blank" rel="noopener noreferrer">Open on {{ tender.get_source_display }}</a> <span class="muted">(Bid/Tender ID: <code>{{ tender.source_key }}</code>)</span>{% else %}—{% endif %}</dd>
 </dl>
 {% if tender.description %}
   <h2>Description</h2>

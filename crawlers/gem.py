@@ -124,6 +124,11 @@ def parse_gem_mirror_html(
         organisation = cell_text(cells[5])
         department = cell_text(cells[6]) if len(cells) > 6 else ""
         title = category[:240] if category else source_key
+        href = anchor.get("href") if anchor else ""
+        if href and "gemfullview" not in href:
+            detail_url = absolute(page_url, href)
+        else:
+            detail_url = "https://bidplus.gem.gov.in/all-bids"
         records.append(
             RawTender(
                 source="gem",
@@ -138,7 +143,7 @@ def parse_gem_mirror_html(
                 quantity=quantity,
                 published_at=parse_portal_datetime(cell_text(cells[1])),
                 deadline_at=parse_portal_datetime(cell_text(cells[2])),
-                detail_url=absolute(page_url, anchor.get("href") if anchor else ""),
+                detail_url=detail_url,
                 status="active",
                 raw={},
             )
