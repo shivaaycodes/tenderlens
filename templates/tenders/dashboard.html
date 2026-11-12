@@ -4,6 +4,15 @@
 {% block content %}
 <h1>Dashboard</h1>
 <p class="muted">{{ tender_count }} tenders ingested. {{ valued_count }} of them publish an estimated value. Zero amounts on the source are stored as missing, not as ₹0.</p>
+<div class="card" style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 2rem 0; padding: 1rem 1.5rem; background: #fdfcf9; border: 1px solid #e7e5e4; border-radius: 6px;">
+  <div>
+    <strong>Procurement Crawler Engine</strong>
+    <p class="muted" style="margin: 0.25rem 0 0 0;">Ingesting notices from GeM, CPPP, and Tamil Nadu GePNIC.</p>
+  </div>
+  <a href="{% url 'crawl' %}" style="background: #0f6e6e; color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 600;">
+    ⚡ Open Crawler Desk
+  </a>
+</div>
 <section>
   <h2>Listings by organisation</h2>
   <img class="chart" src="{% url 'chart' 'organisations' %}" alt="Bar chart of tender counts by organisation">

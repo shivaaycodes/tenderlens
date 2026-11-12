@@ -13,6 +13,7 @@
     <nav>
       <a href="{% url 'home' %}">Tenders</a>
       <a href="{% url 'dashboard' %}">Dashboard</a>
+      <a href="{% url 'crawl' %}">Crawl & Sync</a>
       <a href="{% url 'calendar' %}">Deadlines</a>
       <a href="{% url 'awards' %}">Awards</a>
       {% if user.is_authenticated %}

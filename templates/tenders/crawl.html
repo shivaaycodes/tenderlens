@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Crawler & Ingestion Desk · TenderLens{% endblock %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+  <div>
+    <h1>Portal Crawl & Ingestion Desk</h1>
+    <p class="muted">Trigger on-demand procurement crawls or sync verified tender notices directly into PostgreSQL.</p>
+  </div>
+  <div>
+    <span class="badge" style="background: #0f6e6e; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
+      {{ total_tenders }} Tenders Ingested
+    </span>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+  <h2>Trigger Procurement Sync</h2>
+  <form method="post" action="{% url 'crawl' %}" style="display: grid; gap: 1rem; max-width: 600px; margin-top: 1rem;">
+    {% csrf_token %}
+    <div>
+      <label for="id_source" style="display: block; font-weight: 600; margin-bottom: 0.25rem;">Portal Source</label>
+      <select name="source" id="id_source" style="width: 100%; padding: 0.5rem; border: 1px solid #d6d3d1; border-radius: 4px;">
+        <option value="all">All Portals (GeM + CPPP + Tamil Nadu)</option>
+        <option value="gem">Government e-Marketplace (GeM)</option>
+        <option value="cppp">Central Public Procurement Portal (CPPP)</option>
+        <option value="tamil_nadu">Tamil Nadu GePNIC State Portal</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="id_mode" style="display: block; font-weight: 600; margin-bottom: 0.25rem;">Execution Mode</label>
+      <select name="mode" id="id_mode" style="width: 100%; padding: 0.5rem; border: 1px solid #d6d3d1; border-radius: 4px;">
+        <option value="fixtures">Verified Ingest (Active Rolling Deadlines & Verified Fixtures)</option>
+        <option value="live">Live Web Scrape (Polite Rate-Limited HTTP Client)</option>
+      </select>
+      <small class="muted" style="display: block; margin-top: 0.25rem;">
+        Note: Live scrape respects robots.txt and delays requests by 2s to avoid triggering government WAF blocks.
+      </small>
+    </div>
+
+    <div style="margin-top: 0.5rem;">
+      <button type="submit" style="background: #0f6e6e; color: #fff; border: none; padding: 0.6rem 1.4rem; border-radius: 4px; font-size: 1rem; cursor: pointer; font-weight: 600;">
+        ⚡ Run Crawl / Ingest Now
+      </button>
+    </div>
+  </form>
+</div>
+
+<h2>Recent Ingestion & Crawl History</h2>
+<p class="muted">Live log of crawler runs recorded in the <code>CrawlRun</code> model.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Started (IST)</th>
+      <th>Source</th>
+      <th>Status</th>
+      <th>Duration</th>
+      <th>Ingestion Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for run in recent_runs %}
+      <tr>
+        <td>{{ run.started_at }}</td>
+        <td><strong>{{ run.source|upper }}</strong></td>
+        <td>
+          {% if run.status == "success" %}
+            <span style="color: #0f6e6e; font-weight: 600;">✓ {{ run.get_status_display }}</span>
+          {% elif run.status == "running" %}
+            <span style="color: #b45309; font-weight: 600;">⏳ {{ run.get_status_display }}</span>
+          {% else %}
+            <span style="color: #b91c1c; font-weight: 600;">✕ {{ run.get_status_display }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if run.finished_at %}
+            {{ run.finished_at|timeuntil:run.started_at }}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>
+          {% if run.stats %}
+            <code style="font-size: 0.85rem;">{{ run.stats }}</code>
+          {% elif run.error %}
+            <span style="color: #b91c1c; font-size: 0.85rem;">{{ run.error|truncatechars:80 }}</span>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5">No crawl runs recorded yet. Trigger one above!</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

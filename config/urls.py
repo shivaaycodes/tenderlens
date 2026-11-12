@@ -15,6 +15,7 @@ urlpatterns = [
     path("", tender_views.tender_list, name="home"),
     path("tenders/<int:pk>/", tender_views.tender_detail, name="tender_detail"),
     path("dashboard/", tender_views.dashboard, name="dashboard"),
+    path("crawl/", tender_views.crawl_view, name="crawl"),
     path("dashboard/chart/<str:kind>.png", tender_views.chart, name="chart"),
     path("calendar/", tender_views.calendar_view, name="calendar"),
     path("awards/", tender_views.awards, name="awards"),

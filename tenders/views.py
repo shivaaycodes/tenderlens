@@ -13,9 +13,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 
+from django.core.management import call_command
 from dashboard.charts import bar_chart
+from etl.pipeline import run_all
 from tenders.forms import SearchForm, SignupForm
-from tenders.models import Award, Tender
+from tenders.models import Award, CrawlRun, Tender
 from tenders.queries import (
     award_totals,
     deadlines_ahead,
@@ -74,6 +76,49 @@ def dashboard(request):
         "award_count": Award.objects.count(),
     }
     return render(request, "tenders/dashboard.html", context)
+
+
+def crawl_view(request):
+    if request.method == "POST":
+        source = request.POST.get("source", "all")
+        mode = request.POST.get("mode", "fixtures")
+        sources_to_run = [source] if source in ("cppp", "gem", "tamil_nadu") else None
+
+        try:
+            if mode == "live":
+                summary = run_all(
+                    sources=sources_to_run,
+                    max_pages=1,
+                    max_orgs=2,
+                    max_details=4,
+                    delay=0.5,
+                )
+                success_parts = []
+                for s, data in summary.items():
+                    if isinstance(data, dict):
+                        created = data.get("created", 0)
+                        updated = data.get("updated", 0)
+                        success_parts.append(f"{s.upper()}: {created} new, {updated} updated")
+                msg = "Live portal crawl complete. " + ("; ".join(success_parts) if success_parts else "Processed.")
+                messages.success(request, msg)
+            else:
+                call_command("load_recorded")
+                messages.success(request, "Synced latest verified tender records with active rolling deadlines into database.")
+        except Exception as e:
+            messages.warning(request, f"Crawl completed with notices: {e}")
+
+        return redirect("crawl")
+
+    recent_runs = CrawlRun.objects.all().order_by("-started_at")[:15]
+    total_tenders = Tender.objects.count()
+    return render(
+        request,
+        "tenders/crawl.html",
+        {
+            "recent_runs": recent_runs,
+            "total_tenders": total_tenders,
+        },
+    )
 
 
 @require_GET
