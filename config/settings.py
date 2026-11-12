@@ -151,3 +151,8 @@ if _env("DJANGO_SECURE", "0") == "1":
 CSRF_TRUSTED_ORIGINS = [
     item.strip() for item in _env("CSRF_TRUSTED_ORIGINS", "").split(",") if item.strip()
 ]
+
+RENDER_EXTERNAL_HOSTNAME = _env("RENDER_EXTERNAL_HOSTNAME", "")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")

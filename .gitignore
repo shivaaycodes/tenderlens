@@ -12,3 +12,6 @@ htmlcov/
 *.egg-info/
 .idea/
 .vscode/
+.neon
+node_modules/
+.env.local
